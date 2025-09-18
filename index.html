@@ -12,7 +12,14 @@
   <ul id="messages"></ul>
 
   <script>
-    const ws = new WebSocket("ws://localhost:8080/ws");
+    // Automatically pick ws:// for local, wss:// for Render/HTTPS
+    const wsProtocol = window.location.protocol === "https:" ? "wss://" : "ws://";
+    const wsHost = window.location.host;
+    const ws = new WebSocket(wsProtocol + wsHost + "/ws");
+
+    ws.onopen = function() {
+      console.log("✅ Connected to WebSocket");
+    };
 
     ws.onmessage = function(event) {
       const msg = JSON.parse(event.data);
@@ -21,10 +28,21 @@
       document.getElementById("messages").appendChild(li);
     };
 
+    ws.onclose = function() {
+      console.log("⚠️ WebSocket connection closed");
+    };
+
+    ws.onerror = function(err) {
+      console.error("❌ WebSocket error:", err);
+    };
+
     function sendMessage() {
-      const username = document.getElementById("username").value;
-      const content = document.getElementById("message").value;
-      ws.send(JSON.stringify({username, content}));
+      const username = document.getElementById("username").value.trim();
+      const content = document.getElementById("message").value.trim();
+
+      if (!username || !content) return;
+
+      ws.send(JSON.stringify({ username, content }));
       document.getElementById("message").value = "";
     }
   </script>
