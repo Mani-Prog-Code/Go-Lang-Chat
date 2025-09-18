@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Go Chat MVP</title>
+</head>
+<body>
+  <h2>Simple Chat</h2>
+  <input id="username" placeholder="Username">
+  <br><br>
+  <input id="message" placeholder="Type message">
+  <button onclick="sendMessage()">Send</button>
+  <ul id="messages"></ul>
+
+  <script>
+    const ws = new WebSocket("ws://localhost:8080/ws");
+
+    ws.onmessage = function(event) {
+      const msg = JSON.parse(event.data);
+      const li = document.createElement("li");
+      li.innerText = msg.username + ": " + msg.content;
+      document.getElementById("messages").appendChild(li);
+    };
+
+    function sendMessage() {
+      const username = document.getElementById("username").value;
+      const content = document.getElementById("message").value;
+      ws.send(JSON.stringify({username, content}));
+      document.getElementById("message").value = "";
+    }
+  </script>
+</body>
+</html>
